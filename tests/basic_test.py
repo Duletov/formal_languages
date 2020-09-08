@@ -5,18 +5,17 @@ from pygraphblas import *
 
 
 def test_matrix_product():
-    
     A = Matrix.from_lists(
         [0, 0, 1, 3, 3, 4, 1, 5],
         [1, 3, 2, 4, 5, 2, 5, 4],
         [9, 3, 8, 6, 1, 4, 7, 2],)
-    
+
     B = Matrix.from_lists(
         [0, 0, 1, 3, 3, 4, 1, 5],
         [2, 3, 3, 2, 5, 4, 5, 4],
         [9, 3, 8, 6, 2, 4, 5, 2],)
     actual = A @ B
-    print (actual)
+    print(actual)
     expected = Matrix.from_lists(
         [0, 0, 0, 1, 3, 5],
         [2, 3, 5, 4, 4, 4],
@@ -49,7 +48,6 @@ def test_pda_intersection():
     dfa_1.add_final_state(state2)
     dfa_1.add_final_state(state3)
     dfa_2.add_final_state(state2)
-
 
     # Create transitions
     dfa_1.add_transition(state0, symb_a, state1)
