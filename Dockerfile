@@ -5,4 +5,4 @@ WORKDIR /assignment_1
 COPY . /assignment_1
 
 RUN pip3 install -r minimal-requirements.txt
-CMD ["pytest"]
+CMD ["python3", "main.py"]
