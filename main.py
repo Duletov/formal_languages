@@ -19,7 +19,8 @@ def intersect(graph_1, graph_2):
         
 def output(graph):
     for label in graph.labels():
-        print (label, graph.get_by_label(label))
+        print (label)
+        print(graph.get_by_label(label).nvals)
 
 def all_path(graph):
     adj = graph.transitive_closure()
@@ -72,8 +73,8 @@ def main():
     inter = intersect(g, h)
     output(inter)
     '''all_path(inter)
-    from_bunch(inter, "start.txt")'''
-    from_bunch_to_bunch(inter, "start.txt", "end.txt")
+    from_bunch(inter, "start.txt")
+    from_bunch_to_bunch(inter, "start.txt", "end.txt")'''
     
         
 if __name__ == "__main__":

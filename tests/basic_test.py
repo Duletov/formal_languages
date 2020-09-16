@@ -14,8 +14,9 @@ def test_matrix_product():
         [0, 0, 1, 3, 3, 4, 1, 5],
         [2, 3, 3, 2, 5, 4, 5, 4],
         [9, 3, 8, 6, 2, 4, 5, 2],)
+    
     actual = A @ B
-    print(actual)
+    
     expected = Matrix.from_lists(
         [0, 0, 0, 1, 3, 5],
         [2, 3, 5, 4, 4, 4],
