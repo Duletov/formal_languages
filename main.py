@@ -1,5 +1,6 @@
 from Graph import Graph
 from pygraphblas import *
+import argparse
 
 def intersect(graph_1, graph_2):
     result = Graph()
@@ -61,21 +62,46 @@ def from_bunch_to_bunch(graph, filename_1, filename_2):
 
 def main():
     g = Graph()
-    g.from_trans("input.txt")
-    g.start_vertices.add(0)
-    g.final_vertices.add(1)
-    
+    g.from_trans(args.graph)
     h = Graph()
-    h.from_regex("input2.txt")
-    h.start_vertices.add(0)
-    h.final_vertices.add(1)
+    h.from_regex(args.regex)
     
     inter = intersect(g, h)
     output(inter)
-    '''all_path(inter)
-    from_bunch(inter, "start.txt")
-    from_bunch_to_bunch(inter, "start.txt", "end.txt")'''
-    
-        
+    if args.start and args.end:
+        from_bunch_to_bunch(inter, args.start, args.end)
+    elif args.start:
+        from_bunch(inter, args.start)
+    else:
+        all_path(inter)
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='command line interface for simple graph/dfa operations')
+    parser.add_argument(
+        '--graph'
+        , required=True
+        , type=str
+        , help='path to the graph file'
+    )
+    parser.add_argument(
+        '--regex'
+        , required=True
+        , type=str
+        , help='path to the regex file'
+    )
+    parser.add_argument(
+        '--start'
+        , required=False
+        , type=str
+        , help='path to the file with start vertices'
+    )
+    parser.add_argument(
+        '--end'
+        , required=False
+        , type=str
+        , help='path to the file with end vertices'
+    )
+    args = parser.parse_args()
+    
     main()

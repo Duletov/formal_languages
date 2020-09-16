@@ -21,28 +21,7 @@ def test_read_from_file():
     c_eq = g.get_by_label('c').iseq(c_mtrx)
     d_eq = g.get_by_label('d').iseq(d_mtrx)
     
-    assert a_eq or b_eq or c_eq or d_eq
-
-
-def test_read_from_regex():
-    g = Graph()
-    g.from_regex("input2.txt")
-    
-    a_mtrx = Matrix.sparse(BOOL, 3, 3)
-    a_mtrx[0,1] = True
-    b_mtrx = Matrix.sparse(BOOL, 3, 3)
-    b_mtrx[1,1] = True
-    c_mtrx = Matrix.sparse(BOOL, 3, 3)
-    c_mtrx[1,2] = True
-    d_mtrx = Matrix.sparse(BOOL, 3, 3)
-    d_mtrx[0,1] = True
-    
-    a_eq = g.get_by_label('a').iseq(a_mtrx)
-    b_eq = g.get_by_label('b').iseq(b_mtrx)
-    c_eq = g.get_by_label('c').iseq(c_mtrx)
-    d_eq = g.get_by_label('d').iseq(d_mtrx)
-    
-    assert a_eq or b_eq or c_eq or d_eq
+    assert a_eq and b_eq and c_eq  and d_eq
 
 
 def test_intersect():
@@ -50,38 +29,28 @@ def test_intersect():
     g.from_trans("input.txt")
     h = Graph()
     h.from_regex("input2.txt")
+    expected = Graph()
+    expected.from_trans("expected.txt")
     
-    result = intersect(g, h)
+    actual = intersect(g, h)
     
-    a_mtrx = Matrix.sparse(BOOL, 12, 12)
-    a_mtrx[0,4] = True
-    b_mtrx = Matrix.sparse(BOOL, 12, 12)
-    b_mtrx[4,4] = True
-    c_mtrx = Matrix.sparse(BOOL, 12, 12)
-    c_mtrx[4,8] = True
-    d_mtrx = Matrix.sparse(BOOL, 12, 12)
+    equality = True
     
-    a_eq = result.get_by_label('a').iseq(a_mtrx)
-    b_eq = result.get_by_label('b').iseq(b_mtrx)
-    c_eq = result.get_by_label('c').iseq(c_mtrx)
-    d_eq = result.get_by_label('d').iseq(d_mtrx)
+    for label in expected.labels():
+        equality += actual.get_by_label(label).nvals == expected.get_by_label(label).nvals
     
-    assert a_eq or b_eq or c_eq or d_eq
+    assert equality
     
 def test_transitive_closure():
-    g = Graph()
-    g.from_trans("input.txt")
-    h = Graph()
-    h.from_regex("input2.txt")
+    ex = Graph()
+    ex.from_trans("expected.txt")
     
-    result = intersect(g, h)
-    actual = result.transitive_closure()
+    actual = Matrix.sparse(BOOL, 3, 3)
+    actual[0,1] = True
+    actual[0,2] = True
+    actual[1,1] = True
+    actual[1,2] = True
     
-    expected = Matrix.sparse(BOOL, 12, 12)
-    expected[2,4] = True
-    expected[2,6] = True
-    expected[4,4] = True
-    expected[4,6] = True
-    expected[5,10] = True
+    expected = ex.transitive_closure()
     
     assert actual.iseq(expected)
