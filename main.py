@@ -25,36 +25,22 @@ def output(graph):
         print(label, graph.get_by_label(label).nvals)
 
 
-def all_path(graph):
-    adj = graph.transitive_closure()
-    adj.select(lib.GxB_NONZERO)
-    for i, j, _ in zip(*adj.to_lists()):
-        print(f'from {i} to {j}')
+def call(graph, filename_1, filename_2):
+    if filename_1 == None:
+        result_1 = range(graph.n_vertices)
+    else:
+        input_file = open(filename_1)
+        vertices = input_file.read().rstrip().split('\n')
+        input_file.close()
+        result_1 = [int(item) for item in vertices]
 
-
-def from_bunch(graph, filename):
-    input_file = open(filename)
-    vertices = input_file.read().rstrip().split('\n')
-    input_file.close()
-    result = [int(item) for item in vertices]
-
-    adj = graph.transitive_closure()
-    adj.select(lib.GxB_NONZERO)
-    for i, j, _ in zip(*adj.to_lists()):
-        if i in result:
-            print(f'from {i} to {j}')
-
-
-def from_bunch_to_bunch(graph, filename_1, filename_2):
-    input_file = open(filename_1)
-    vertices = input_file.read().rstrip().split('\n')
-    input_file.close()
-    result_1 = [int(item) for item in vertices]
-
-    input_file = open(filename_2)
-    vertices = input_file.read().rstrip().split('\n')
-    input_file.close()
-    result_2 = [int(item) for item in vertices]
+    if filename_2 == None:
+        result_2 = range(graph.n_vertices)
+    else:
+        input_file = open(filename_2)
+        vertices = input_file.read().rstrip().split('\n')
+        input_file.close()
+        result_2 = [int(item) for item in vertices]
 
     adj = graph.transitive_closure()
     adj.select(lib.GxB_NONZERO)
@@ -71,12 +57,7 @@ def main():
 
     inter = intersect(g, h)
     output(inter)
-    if args.start and args.end:
-        from_bunch_to_bunch(inter, args.start, args.end)
-    elif args.start:
-        from_bunch(inter, args.start)
-    else:
-        all_path(inter)
+    call(inter, args.start, args.end)
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ def test_read_from_file():
     assert a_eq and b_eq and c_eq  and d_eq
 
 
-def test_intersect():
+def test_intersect_simple():
     g = Graph()
     g.from_trans("input.txt")
     h = Graph()
@@ -54,3 +54,55 @@ def test_transitive_closure():
     expected = ex.transitive_closure()
     
     assert actual.iseq(expected)
+
+
+def test_intersect_space():
+    g = Graph()
+    g.from_trans("input.txt")
+    h = Graph()
+    expected = Graph()
+    
+    actual = intersect(g, h)
+    
+    equality = True
+    
+    for label in expected.labels():
+        equality += actual.get_by_label(label).nvals == expected.get_by_label(label).nvals
+    
+    assert equality
+
+
+def test_intersect_parallel():
+    g = Graph()
+    g.from_trans("input.txt")
+    h = Graph()
+    h.from_trans("parallel.txt")
+    expected = Graph()
+    expected.from_trans("expected2.txt")
+    
+    actual = intersect(g, h)
+    
+    equality = True
+    
+    for label in expected.labels():
+        equality += actual.get_by_label(label).nvals == expected.get_by_label(label).nvals
+    
+    assert equality
+
+
+def test_intersect_single():
+    g = Graph()
+    g.from_trans("input.txt")
+    h = Graph()
+    h.from_regex("single.txt")
+    expected = Graph()
+    expected.from_trans("expected2.txt")
+    
+    actual = intersect(g, h)
+    
+    equality = True
+    
+    for label in expected.labels():
+        equality += actual.get_by_label(label).nvals == expected.get_by_label(label).nvals
+    
+    assert equality

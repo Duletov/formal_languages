@@ -48,8 +48,11 @@ class Graph:
         for label_matrix in self.label_matrices.values():
             adj_matrix = adj_matrix | label_matrix
 
-        for k in range(self.n_vertices):
+        while True:
+            old = adj_matrix.nvals
             adj_matrix += adj_matrix @ adj_matrix
+            if old == adj_matrix:
+                break
 
         return adj_matrix
 
