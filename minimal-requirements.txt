@@ -1,2 +1,2 @@
 pytest
-pyformlang
+pyformlang>=0.1.20
