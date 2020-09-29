@@ -7,5 +7,5 @@
 #### Installation & Running
 
  - The only requirement for running is Docker:
-   - `docker build ./ -t formal_languages --build-arg graph=<path to graph file> --build-arg regex=<path to regex file> [--build-arg start=<path to the file with start vertices>] [--build-arg end=<path to the file with end vertices>]`
+   - `docker build ./ -t formal_languages --build-arg graph=<path to graph file> --build-arg regex=<path to file with names of regex files> [--build-arg start=<path to the file with start vertices>] [--build-arg end=<path to the file with end vertices>]`
    - `docker run formal_languages`

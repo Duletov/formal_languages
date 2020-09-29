@@ -43,21 +43,40 @@ class Graph:
         for state in dfa.final_states:
             self.final_vertices.add(state_renumeration[state])
         
-    def transitive_closure(self):
+    def transitive_closure_1(self):
         adj_matrix = Matrix.sparse(BOOL, self.n_vertices, self.n_vertices)
         for label_matrix in self.label_matrices.values():
-            adj_matrix = adj_matrix | label_matrix
+            adj_matrix += label_matrix
 
-        while True:
-            old = adj_matrix.nvals
-            adj_matrix += adj_matrix @ adj_matrix
-            if old == adj_matrix:
-                break
+        if adj_matrix.nvals != 0:
+            while True:
+                old = adj_matrix.nvals
+                adj_matrix += adj_matrix @ adj_matrix
+                if old == adj_matrix:
+                    break
 
         return adj_matrix
+        
+    
+    def transitive_closure_2(self):
+        adj_matrix = Matrix.sparse(BOOL, self.n_vertices, self.n_vertices)
+        result = Matrix.sparse(BOOL, self.n_vertices, self.n_vertices)
+        for label_matrix in self.label_matrices.values():
+            adj_matrix += label_matrix
+
+        if adj_matrix.nvals != 0:
+            while True:
+                old = result.nvals
+                result += adj_matrix
+                if old == result.nvals:
+                    break
+
+        return result
+
 
     def labels(self):
         return self.label_matrices.keys()
+
 
     def get_by_label(self, label):
         if label not in self.label_matrices.keys():

@@ -51,7 +51,7 @@ def test_transitive_closure():
     actual[1,1] = True
     actual[1,2] = True
     
-    expected = ex.transitive_closure()
+    expected = ex.transitive_closure_1()
     
     assert actual.iseq(expected)
 
