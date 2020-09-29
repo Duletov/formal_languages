@@ -93,7 +93,7 @@ class CNF(CFG):
                 variables = self.heads_for_body.get(Terminal(label), set())
                 for var in variables:
                     cur_edges_by_end[to].add((var, fro))
-                    cur_edges_by_end[fro].add((var, to))
+                    cur_edges_by_start[fro].add((var, to))
                     m.append((var, fro, to))
                     
         ans = []
@@ -105,6 +105,7 @@ class CNF(CFG):
                     if (var_3, w) not in cur_edges_by_end[u]:
                         m.append((var_3, w, u))
                         cur_edges_by_end[u].add((var_3, w))
+                        cur_edges_by_start[w].add((var_3, u))
                         if u == v:
                             cur_edges_mid.append((var_3, w))
                         if var_3 == self.start_symbol:
@@ -114,6 +115,7 @@ class CNF(CFG):
                 for var_3 in self.heads_for_body.get((var_1, var_2), set()):
                     if (var_3, w) not in cur_edges_by_start[v]:
                         m.append((var_3, v, w))
+                        cur_edges_by_end[w].add((var_3, v))
                         cur_edges_by_start[v].add((var_3, w))
                         if v == u:
                             cur_edges_mid.append((var_3, w))
