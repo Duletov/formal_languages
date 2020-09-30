@@ -53,6 +53,6 @@ def test_Helling_epsilon():
     g.from_trans("hell.txt")
     
     ans = mycnf.Hellings(g)
-    expected = [(0, 2), (0, 0), (1, 1), (2, 2)]
+    expected = [(0, 0), (1, 1), (2, 2), (0, 2)]
     
     assert(ans == expected)

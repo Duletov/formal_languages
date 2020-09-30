@@ -95,8 +95,15 @@ class CNF(CFG):
                     cur_edges_by_end[to].add((var, fro))
                     cur_edges_by_start[fro].add((var, to))
                     m.append((var, fro, to))
-                    
+
         ans = []
+        if self.generates_epsilon:
+            for i in range(n):
+                cur_edges_by_end[i].add((self.start_symbol, i))
+                cur_edges_by_start[i].add((self.start_symbol, i))
+                ans.append((i, i))
+                    
+        
         while(len(m) > 0):
             (var_1, v, u) = m.pop()
             cur_edges_mid = list(cur_edges_by_end[v])
@@ -121,8 +128,5 @@ class CNF(CFG):
                             cur_edges_mid.append((var_3, w))
                         if var_3 == self.start_symbol:
                             ans.append((v, w))
-        if self.generates_epsilon:
-            for i in range(n):
-                ans.append((i, i))
 
         return ans
