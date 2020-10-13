@@ -2,6 +2,7 @@ from typing import AbstractSet, Iterable
 from pyformlang.cfg import *
 from pygraphblas import *
 from Graph import Graph
+from main import intersect
 from itertools import product
 from collections import deque
 
@@ -41,9 +42,11 @@ class CNF(CFG):
             if len(production.body) == 1:
                 body = production.body[0]
                 self.terminal_productions.append(production)
-            else:
+            elif len(production.body) == 2:
                 body = tuple(production.body)
                 self.nonterminal_productions.append(production)
+            else:
+                body = tuple(production.body)
             self.heads_for_body[body] = self.heads_for_body.get(body, set()) | {production.head}
 
 
@@ -138,23 +141,76 @@ class CNF(CFG):
         
         
     def Azimov(self, graph):
-        bool_matrix = Graph()
-        bool_matrix.n_vertices = graph.n_vertices
+        result = Graph()
+        result.n_vertices = graph.n_vertices
         for production in self.terminal_productions:
-            bool_matrix.get_by_label(production.head.value)
-            bool_matrix.label_matrices[production.head.value] += graph.get_by_label(production.body[0].value)
+            result.get_by_label(production.head.value)
+            result.label_matrices[production.head.value] += graph.get_by_label(production.body[0].value)
 
         if self.generate_epsilon():
             for i in range(graph.n_vertices):
-                bool_matrix.get_by_label(self.start_symbol)[i, i] = True
+                result.get_by_label(self.start_symbol)[i, i] = True
 
         changes = True
         while changes:
             changes = False
             for production in self.nonterminal_productions:
-                prev = bool_matrix.get_by_label(production.head.value).nvals
-                bool_matrix.label_matrices[production.head.value] += bool_matrix.label_matrices[production.body[0].value] @ bool_matrix.label_matrices[production.body[1].value]
-                if prev != bool_matrix.label_matrices[production.head.value].nvals:
+                prev = result.get_by_label(production.head.value).nvals
+                result.label_matrices[production.head.value] += result.get_by_label(production.body[0].value) @ result.get_by_label(production.body[1].value)
+                if prev != result.label_matrices[production.head.value].nvals:
                     changes = True
 
-        return list(zip(*bool_matrix.label_matrices[self.start_symbol].to_lists()[:2]))
+        return list(zip(*result.label_matrices[self.start_symbol].to_lists()[:2]))
+        
+    def Tenzor(self, graph, rec_auto, heads):
+        result = Graph()
+        result.n_vertices = graph.n_vertices
+        for label in graph.labels():
+            result.get_by_label(label)
+            result.label_matrices[label] = graph.label_matrices[label]
+        result.start_vertices = graph.start_vertices
+        result.final_vertices = graph.final_vertices
+        
+        result.get_by_label(self.start_symbol.value)
+        if self.generate_epsilon():
+            for i in range(graph.n_vertices):
+                result.get_by_label(self.start_symbol)[i, i] = True
+        changes = True
+        intersection = Graph()
+        intersection = intersect(result, rec_auto)
+        transitive_closure = intersection.transitive_closure_1()
+        n = intersection.n_vertices
+        while changes:
+            prev = transitive_closure.nvals
+            for i in range(n):
+                for j in range(n):
+                    if (i, j) in transitive_closure:
+                        s = i % rec_auto.n_vertices
+                        f = j % rec_auto.n_vertices
+                        if (s in rec_auto.start_vertices) and (f in rec_auto.final_vertices):
+                            x = i // rec_auto.n_vertices
+                            y = j // rec_auto.n_vertices
+                            result.get_by_label(heads[s, f])[x, y] = True
+            intersection = intersect(result, rec_auto)
+            transitive_closure = intersection.transitive_closure_1()
+            if transitive_closure.nvals == prev:
+                changes = False
+        return list(zip(*result.label_matrices[self.start_symbol].to_lists()[:2]))
+        
+    def to_recursive_automaton(self):
+        rec_auto = Graph()
+        heads = {}
+        for production in self.productions:
+            length = len(production.body)
+            rec_auto.n_vertices += length + 1
+        ver = 0
+        for production in self.productions:
+            length = len(production.body)
+            rec_auto.start_vertices.add(ver)
+            for i in range(length):
+                rec_auto.get_by_label(production.body[i].value)[ver, ver + 1] = True
+                ver += 1
+            rec_auto.final_vertices.add(ver)
+            heads[ver - length, ver] = production.head.value
+            ver += 1
+        return rec_auto, heads

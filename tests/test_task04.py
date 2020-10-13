@@ -56,3 +56,47 @@ def test_Helling_epsilon():
     expected = [(0, 0), (1, 1), (2, 2), (0, 2)]
     
     assert(ans == expected)
+    
+def test_Azimov_default():
+    mycnf = CNF.from_file("cnf2.txt")
+    g = Graph()
+    g.from_trans("hell.txt")
+    
+    ans = mycnf.Azimov(g)
+    expected = [(0, 2)]
+    
+    assert(ans == expected)
+    
+def test_Azimov_default():
+    mycnf = CNF.from_file("cnf.txt")
+    g = Graph()
+    g.from_trans("hell.txt")
+    
+    ans = mycnf.Azimov(g)
+    expected = [(0, 0), (0, 2), (1, 1), (2, 2)]
+    
+    assert(ans == expected)
+
+def test_Tenzor_default():
+    mycnf = CNF.from_file("cnf2.txt")
+    g = Graph()
+    g.from_trans("hell.txt")
+    
+    rec_auto, heads = mycnf.to_recursive_automaton()
+    
+    ans = mycnf.Tenzor(g, rec_auto, heads)
+    expected = [(0, 2)]
+    
+    assert(ans == expected)
+    
+def test_Tenzor_default():
+    mycnf = CNF.from_file("cnf.txt")
+    g = Graph()
+    g.from_trans("hell.txt")
+    
+    rec_auto, heads = mycnf.to_recursive_automaton()
+    
+    ans = mycnf.Tenzor(g, rec_auto, heads)
+    expected = [(0, 0), (0, 2), (1, 1), (2, 2)]
+    
+    assert(ans == expected)
