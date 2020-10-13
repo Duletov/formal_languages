@@ -18,6 +18,9 @@ class CNF(CFG):
             start_symbol = start_symbol,
             productions = productions
         )
+        
+        self.terminal_productions = list()
+        self.nonterminal_productions = list()
 
         self.generates_epsilon = cfg.generate_epsilon()
         cfg = cfg.to_normal_form()
@@ -37,8 +40,10 @@ class CNF(CFG):
         for production in self._productions:
             if len(production.body) == 1:
                 body = production.body[0]
+                self.terminal_productions.append(production)
             else:
                 body = tuple(production.body)
+                self.nonterminal_productions.append(production)
             self.heads_for_body[body] = self.heads_for_body.get(body, set()) | {production.head}
 
 
@@ -130,3 +135,26 @@ class CNF(CFG):
                             ans.append((v, w))
 
         return ans
+        
+        
+    def Azimov(self, graph):
+        bool_matrix = Graph()
+        bool_matrix.n_vertices = graph.n_vertices
+        for production in self.terminal_productions:
+            bool_matrix.get_by_label(production.head.value)
+            bool_matrix.label_matrices[production.head.value] += graph.get_by_label(production.body[0].value)
+
+        if self.generate_epsilon():
+            for i in range(graph.n_vertices):
+                bool_matrix.get_by_label(self.start_symbol)[i, i] = True
+
+        changes = True
+        while changes:
+            changes = False
+            for production in self.nonterminal_productions:
+                prev = bool_matrix.get_by_label(production.head.value).nvals
+                bool_matrix.label_matrices[production.head.value] += bool_matrix.label_matrices[production.body[0].value] @ bool_matrix.label_matrices[production.body[1].value]
+                if prev != bool_matrix.label_matrices[production.head.value].nvals:
+                    changes = True
+
+        return list(zip(*bool_matrix.label_matrices[self.start_symbol].to_lists()[:2]))
