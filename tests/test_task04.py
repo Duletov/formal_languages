@@ -96,6 +96,16 @@ def test_Azimov_loop():
     expected = [(0, 0)]
     
     assert(ans == expected)
+    
+def test_Azimov_epsilon_2():
+    mycnf = CNF.from_file("cnf3.txt")
+    g = Graph()
+    g.from_trans("hell2.txt")
+    
+    ans = mycnf.Azimov(g)
+    expected = [(0, 0), (0, 1), (0, 3), (0, 4), (1, 1), (1, 2), (1, 3), (1, 4), (2, 2), (2, 3), (2, 4), (3, 3), (3, 4), (4, 3), (4, 4)]
+    
+    assert(ans == expected)
 
 def test_Tenzor_default():
     mycnf = CNF.from_file("cnf2.txt")
@@ -130,5 +140,17 @@ def test_Tenzor_loop():
     
     ans = mycnf.Tenzor(g, rec_auto, heads)
     expected = [(0, 0)]
+    
+    assert(ans == expected)
+    
+def test_Tenzor_epsilon_2():
+    mycnf = CNF.from_file("cnf3.txt")
+    g = Graph()
+    g.from_trans("hell2.txt")
+    
+    rec_auto, heads = mycnf.to_recursive_automaton()
+    
+    ans = mycnf.Tenzor(g, rec_auto, heads)
+    expected = [(0, 0), (0, 1), (0, 3), (0, 4), (1, 1), (1, 2), (1, 3), (1, 4), (2, 2), (2, 3), (2, 4), (3, 3), (3, 4), (4, 3), (4, 4)]
     
     assert(ans == expected)
