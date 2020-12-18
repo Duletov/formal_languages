@@ -1,10 +1,10 @@
 from typing import AbstractSet, Iterable
 from pyformlang.cfg import *
 from pygraphblas import *
-from Graph import Graph
-from main import intersect
+from Graph import Graph, intersect
 from itertools import product
 from collections import deque
+import time
 
 class CNF(CFG):
     def __init__(self,
@@ -182,15 +182,13 @@ class CNF(CFG):
         n = intersection.n_vertices
         while changes:
             prev = transitive_closure.nvals
-            for i in range(n):
-                for j in range(n):
-                    if (i, j) in transitive_closure:
-                        s = i % rec_auto.n_vertices
-                        f = j % rec_auto.n_vertices
-                        if (s in rec_auto.start_vertices) and (f in rec_auto.final_vertices):
-                            x = i // rec_auto.n_vertices
-                            y = j // rec_auto.n_vertices
-                            result.get_by_label(heads[s, f])[x, y] = True
+            for i, j, _ in zip(*transitive_closure.select(lib.GxB_NONZERO).to_lists()):
+                s = i % rec_auto.n_vertices
+                f = j % rec_auto.n_vertices
+                if (s in rec_auto.start_vertices) and (f in rec_auto.final_vertices):
+                    x = i // rec_auto.n_vertices
+                    y = j // rec_auto.n_vertices
+                    result.get_by_label(heads[s, f])[x, y] = True
             intersection = intersect(result, rec_auto)
             transitive_closure = intersection.transitive_closure_1()
             if transitive_closure.nvals == prev:

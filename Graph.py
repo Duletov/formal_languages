@@ -82,3 +82,20 @@ class Graph:
         if label not in self.label_matrices.keys():
             self.label_matrices[label] = Matrix.sparse(BOOL, self.n_vertices, self.n_vertices)
         return self.label_matrices[label]
+
+
+def intersect(graph_1, graph_2):
+    result = Graph()
+    result.n_vertices = graph_1.n_vertices * graph_2.n_vertices
+    for i in graph_1.start_vertices:
+        for j in graph_2.start_vertices:
+            result.start_vertices.add(i * graph_1.n_vertices + j)
+
+    for i in graph_1.final_vertices:
+        for j in graph_2.final_vertices:
+            result.final_vertices.add(i * graph_1.n_vertices + j)
+
+    for label in graph_1.labels() | graph_2.labels():
+        result.label_matrices[label] = graph_1.get_by_label(label).kronecker(graph_2.get_by_label(label))
+
+    return result

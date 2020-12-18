@@ -6,6 +6,6 @@ python:
 services: docker
 
 script:
-  - docker build ./ -t formal_languages --build-arg graph="input.txt" --build-arg regex="lis.txt"
+  - docker build ./ -t formal_languages --build-arg mod="dif" --build-arg graph="reg.txt" --build-arg query="ab"
   - docker run formal_languages
   
