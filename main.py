@@ -1,29 +1,16 @@
-from Graph import Graph
+from Graph import Graph, intersect
+from CFG import CNF
+from differ import differ, nullable, reduce
 from pygraphblas import *
 import argparse
 import time
-import copy
+from pyformlang.regular_expression import Regex
+
 
 res_trans1 = list()
 res_trans2 = list()
 res_pairs = list()
 res = list()
-
-def intersect(graph_1, graph_2):
-    result = Graph()
-    result.n_vertices = graph_1.n_vertices * graph_2.n_vertices
-    for i in graph_1.start_vertices:
-        for j in graph_2.start_vertices:
-            result.start_vertices.add(i * graph_1.n_vertices + j)
-
-    for i in graph_1.final_vertices:
-        for j in graph_2.final_vertices:
-            result.final_vertices.add(i * graph_1.n_vertices + j)
-
-    for label in graph_1.labels() | graph_2.labels():
-        result.label_matrices[label] = graph_1.get_by_label(label).kronecker(graph_2.get_by_label(label))
-
-    return result
 
 
 def output(graph):
@@ -82,14 +69,14 @@ def call(graph, filename_1, filename_2):
     res_pairs.append(time3/5)
 
 
-def main():
+def main_regex():
     time1 = time.time()
     g = Graph()
     g.from_trans(args.graph)
     time2 = time.time()
     print(f"Time to built graph {time2 - time1}")
     
-    input_file = open(args.regex)
+    input_file = open(args.query)
     regexes = input_file.read().rstrip().split('\n')
     input_file.close()
     
@@ -111,16 +98,144 @@ def main():
         
         output(inter)
         call(inter, args.start, args.end)
-        
-    '''print(res_inter)
-    print(res_trans1)
-    print(res_trans2)
-    print(res_pairs)
-    print(res)'''
 
+
+def main_cfg():
+    input_file = open(args.graph)
+    graphs = input_file.read().rstrip().split('\n')
+    input_file.close()
+    res_H = []
+    res_A = []
+    res_RA = []
+    res_T = []
+    for graph in graphs:
+        time1 = time.time()
+        g = Graph()
+        print(graph)
+        g.from_trans(graph)
+        time2 = time.time()
+        print(f"Time to built graph {time2 - time1}")
+        
+        input_file = open(args.query)
+        cfg = input_file.read().rstrip().split('\n')
+        input_file.close()
+    
+        for file in cfg:
+            print()
+            print(file)
+            mycnf = CNF.from_file(file)
+            time3 = 0
+            for i in range(5):
+                time1 = time.time()
+                ans = mycnf.Hellings(g)
+                time2 = time.time()
+                time3 += time2 - time1
+            print(f"Time Hellings {time3/5}")
+            res_H.append(time3/5)
+            time3 = 0
+            for i in range(5):
+                time1 = time.time()
+                ans = mycnf.Azimov(g)
+                time2 = time.time()
+                time3 += time2 - time1
+            print(f"Time Azimov {time3/5}")
+            res_A.append(time3/5)
+            time3 = 0
+            for i in range(5):
+                time1 = time.time()
+                rec_auto, heads = mycnf.to_recursive_automaton()
+                time2 = time.time()
+                time3 += time2 - time1
+            print(f"Time RecAuto {time3/5}")
+            res_RA.append(time3/5)
+            time3 = 0
+            for i in range(5):
+                time1 = time.time()
+                ans = mycnf.Tenzor(g, rec_auto, heads)
+                time2 = time.time()
+                time3 += time2 - time1
+            print(f"Time Tenzor {time3/5}")
+            res_T.append(time3/5)
+    print(res_H)
+    print(res_A)
+    print(res_RA)
+    print(res_T)
+
+            
+def min_cfg():
+    input_file = open(args.graph)
+    graphs = input_file.read().rstrip().split('\n')
+    input_file.close()
+    res_H = []
+    res_A = []
+    res_RA = []
+    res_T = []
+    graph = graphs[7]
+    time1 = time.time()
+    g = Graph()
+    print(graph)
+    g.from_trans(graph)
+    time2 = time.time()
+    print(f"Time to built graph {time2 - time1}")
+    input_file = open(args.query)
+    cfg = input_file.read().rstrip().split('\n')
+    input_file.close()
+    
+    file = cfg[0]
+    print()
+    print(file)
+    mycnf = CNF.from_file(file)
+    time3 = 0
+    for i in range(5):
+        time1 = time.time()
+        ans = mycnf.Hellings(g)
+        time2 = time.time()
+        time3 += time2 - time1
+    print(f"Time Hellings {time3/5}")
+    res_H.append(time3/5)
+    time3 = 0
+    for i in range(5):
+        time1 = time.time()
+        ans = mycnf.Azimov(g)
+        time2 = time.time()
+        time3 += time2 - time1
+    print(f"Time Azimov {time3/5}")
+    res_A.append(time3/5)
+    time3 = 0
+    for i in range(5):
+        time1 = time.time()
+        rec_auto, heads = mycnf.to_recursive_automaton()
+        time2 = time.time()
+        time3 += time2 - time1
+    print(f"Time RecAuto {time3/5}")
+    res_RA.append(time3/5)
+    time3 = 0
+
+    print('job done')
+
+
+def main_differ():
+    input_file = open(args.graph)
+    regex = Regex(input_file.read().rstrip())
+    word = args.query
+    print(regex.get_tree_str())
+    for letter in word:
+        regex = differ(regex, letter)
+        for i in range(len(word)):
+            regex = reduce(regex)
+        print(regex.get_tree_str())
+    print(nullable(regex))
+    
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='command line interface for simple graph/dfa operations')
+    parser.add_argument(
+        '--mod',
+        required=True,
+        type=str,
+        help='Reg or cfg',
+    )
     parser.add_argument(
         '--graph',
         required=True,
@@ -128,10 +243,10 @@ if __name__ == "__main__":
         help='path to the graph file',
     )
     parser.add_argument(
-        '--regex',
+        '--query',
         required=True,
         type=str,
-        help='path to file with names of regex files',
+        help='path to file with names of regex/cfg files',
     )
     parser.add_argument(
         '--start',
@@ -147,4 +262,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main()
+    space = [i for i in range(100000)]
+    print('job done')
+    
+    if args.mod == 'reg':
+        main()
+    elif args.mod == 'dif':
+        main_differ()
+    else:
+        min_cfg()
